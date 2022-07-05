@@ -1,96 +1,70 @@
-#include <stdlib.h>
 #include "lists.h"
+#include <stdio.h>
 
-/**
- * reverse - reverses a linked list
- * @head: pointer to pointer to the first node
- *
- * Return: head pointer, pointing to reversed list
- */
-listint_t *reverse(listint_t **head)
+int is_palindrome(listint_t **head)
 {
-	listint_t *front;
-	listint_t *back;
+  listint_t *nhead, *tort, *hare, *ptort;
+  listint_t *cut = NULL, *half, *it1, *it2;
 
-	back = *head;
-	*head = (*head)->next;
-	back->next = NULL;
+  if (!head || !*head)
+    return (1);
 
-	front = *head;
-	*head = (*head)->next;
-
-	while (1)
+  nhead = *head;
+  if (nhead->next != NULL)
+    {
+      for (hare = nhead, tort = nhead; hare != NULL && hare->next != NULL;
+	   ptort = tort, tort = tort->next)
+	hare = hare->next->next;
+      if (hare != NULL)
 	{
-		if (*head == NULL)
-		{
-			front->next = back;
-			*head = front;
-			break;
-		}
-		front->next = back;
-		back = front;
-
-		front = *head;
-		*head = (*head)->next;
+	  cut = tort;
+	  tort = tort->next;
 	}
-	return (*head);
+      ptort->next = NULL;
+      half = tort;
+      it1 = reverse_listint(&half);
+      for (it2 = *head; it2; it1 = it1->next, it2 = it2->next)
+	{
+	  if (it2->n != it1->n)
+	    return (0);
+	}
+      if (cut == NULL)
+	ptort->next = half;
+      else
+	{
+	  ptort->next = cut;
+	  cut->next = half;
+	}
+    }
+
+  return (1);
 }
 
 /**
- * is_paplindrome - checks if a singly linked list is palindrome
- * @head: pointer to pointer to list's first node
+ * reverse_listint - Reverses a linked list in pladce
+ * @head: Pointer to a pointer pointing to the first item in the list
  *
- * Description: An empty list is considered a palindrome
- *
- * Return: 1 if it's a palindrome, or 0 otherwise
+ * Return: The new head of the reversed list
  */
-int is_palindrome(listint_t **head)
+listint_t *reverse_listint(listint_t **head)
 {
-	listint_t *tmp; /* traverse the list to get its length */
-	listint_t *front; /* upper half of the list */
-	listint_t *back; /* lower half */
+  listint_t *next = NULL, *prev = NULL;
 
-	listint_t *tmp_front; 		/* traverse the upper half of the list */
+  if (!head || !*head)
+    return (NULL);
 
-	int n;	/* length of the list */
-	int half = 0;
-	int palind = 1;
+  while ((*head)->next)
+    {
+      next = (*head)->next;
 
-	if (!(*head))
-		return (0);
-	
-	tmp = *head;
-	n = 0;
-	while (tmp != NULL)
-	{
-		tmp = tmp->next;
-		n++;
-	}
+      (*head)->next = prev;
 
-	back = front = *head;
+      prev = *head;
 
-	while (half < n/2)
-	{
-		front = front->next;
-		half++;
-	}
+      *head = next;
+    }
 
-	reverse(&front);	/* reverse the upper half of the list */
-	tmp_front = front;
+  (*head)->next = prev;
 
-	while (tmp_front != NULL)
-	{
-		if (tmp_front->n != back->n)
-		{
-			palind = 0;
-			break;
-		}
-		tmp_front = tmp_front->next;
-		back = back->next;
-	}
-	reverse(&front);	/* reconstitute the original list */
-
-	if (palind == 0)
-		return (0);
-	return (1);
+  return (*head);
 }
